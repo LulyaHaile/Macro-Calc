@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap" rel="stylesheet">
+    <title>MicroMinder</title>
+</head>
+<body>
+    <header>
+        <h1>MicroMinder</h1>
+    </header>
+    <div class="container">
+        <h2>Profile Information</h2>
+<form action="/save_profile" method="POST">
+    <label for="age">Age:</label>
+    <input type="number" id="age" name="age" required>
+
+
+    <label for="sex">Sex:</label>
+    <select id="sex" name="sex" required>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+    </select>
+
+
+    <label for="height">Height (in):</label>
+    <input type="number" id="height" name="height" required>
+
+
+    <!-- New Activity Level Field -->
+    <label for="activity_level">Activity Level:</label>
+    <select id="activity_level" name="activity_level" required>
+        <option value="none">No activity</option>
+        <option value="light">Light activity</option>
+        <option value="active">Active</option>
+    </select>
+
+
+    <button type="submit">Save Profile</button>
+</form>
+
+
+<!-- Display user profile -->
+{% if profile %}
+    <h3>Your Profile</h3>
+    <p>Age: {{ profile['age'] }}</p>
+    <p>Sex: {{ profile['sex'] }}</p>
+    <p>Height: {{ profile['height'] }} in</p>
+    <p>Activity Level:
+        {% if profile['activity_level'] == 'none' %}
+            No activity
+        {% elif profile['activity_level'] == 'light' %}
+            Light activity
+        {% elif profile['activity_level'] == 'active' %}
+            Active
+        {% endif %}
+    </p>
+{% endif %}
+
+
+        <h2>Macronutrients Goal</h2>
+        <form action="/calculate_macros" method="POST">
+            <label for="weight_for_calc">Weight (lb):</label>
+            <input type="number" id="weight_for_calc" name="weight_for_calc" required>
+            <button type="submit">Calculate Macronutrients</button>
+        </form>
+
+
+        {% if profile.get('protein_goal') %}
+            <h3>Your Macronutrient Goals</h3>
+            <p>Protein Goal: {{ profile['protein_goal'] }} g</p>
+            <p>Fiber Goal: {{ profile['fiber_goal'] }} g</p>
+            <p>Carbs Goal: {{ profile['carbs_goal'] }} g</p>
+            <p>Sugar Goal: {{ profile['sugar_goal'] }} g</p>
+        {% endif %}
+
+
+        <h2>Search Food Item</h2>
+        <form action="/search_food" method="POST">
+            <label for="food_item">Food Item:</label>
+            <input type="text" id="food_item" name="food_item" required>
+            <button type="submit">Search</button>
+        </form>
+
+
+        {% if food_results %}
+            <h3>Search Results</h3>
+            <ul>
+                {% for food in food_results %}
+                    <li>
+                        {{ food['description'] }}
+                        <form action="/log_food" method="POST" style="display: inline;">
+                            <input type="hidden" name="food_id" value="{{ food['fdcId'] }}">
+                            <button type="submit">Log Food</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+
+        <h3>Logged Food Items</h3>
+        <ul>
+            {% for item in food_log %}
+                <li>{{ item['item'] }} - Protein: {{ item['protein'] }}g, Fiber: {{ item['fiber'] }}g, Carbs: {{ item['carbs'] }}g, Sugar: {{ item['sugar'] }}g</li>
+            {% endfor %}
+        </ul>
+<table style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <th style="border: 1px solid #ddd; padding: 8px;">Food Item</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Protein (g)</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Fiber (g)</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Carbs (g)</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Sugar (g)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in food_log %}
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item['item'] }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item['protein'] }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item['fiber'] }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item['carbs'] }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item['sugar'] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+
+
+        <h3>Nutrient Totals</h3>
+        <p>Total Protein: {{ food_log | map(attribute='protein') | sum }} g</p>
+        <p>Total Fiber: {{ food_log | map(attribute='fiber') | sum }} g</p>
+        <p>Total Carbs: {{ food_log | map(attribute='carbs') | sum }} g</p>
+        <p>Total Sugar: {{ food_log | map(attribute='sugar') | sum }} g</p>
+
+
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </div>
+</body>
+</html>
+
+
