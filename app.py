@@ -9,6 +9,7 @@ app.secret_key = 'clAkvcBeeoygBXhdBOXE1T4zRK4P0TyHXzKvCjxf'  # Replace with your
 # Initialize variables to store user profile and food log data
 user_profile = {}
 food_log = []
+macros = ""
 
 
 # USDA API endpoint and your API key
@@ -32,7 +33,7 @@ def get_food_nutrition(food_item):
 
 @app.route('/')
 def home():
-    return render_template('index.html', profile=user_profile, food_log=food_log)
+    return render_template('index.html', profile=user_profile, food_log=food_log, macros=macros)
 
 
 @app.route('/save_profile', methods=['POST'])
@@ -154,5 +155,7 @@ def calculate_totals():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
 
 
